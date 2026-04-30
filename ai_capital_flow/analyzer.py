@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from textwrap import dedent
 
 from openai import OpenAI
@@ -11,16 +12,17 @@ from .render import REPORT_TEMPLATE_KEYS
 
 
 def build_report_sections(data: ReportData, settings: Settings) -> dict[str, object]:
-    if settings.openai_api_key:
+    deterministic = build_fallback_sections(data)
+    if settings.openai_api_key and os.getenv("OPENAI_SYNTHESIS", "").lower() == "true":
         try:
-            return build_with_openai(data, settings)
+            ai_sections = build_with_openai(data, settings)
+            return preserve_verified_fact_sections(ai_sections, deterministic)
         except Exception as exc:
-            fallback = build_fallback_sections(data)
-            fallback["risk_warning"] = (
+            deterministic["risk_warning"] = (
                 f"OpenAI synthesis failed, so this report used deterministic summaries only. Error: {exc}"
             )
-            return fallback
-    return build_fallback_sections(data)
+            return deterministic
+    return deterministic
 
 
 def build_with_openai(data: ReportData, settings: Settings) -> dict[str, object]:
@@ -46,7 +48,8 @@ def build_with_openai(data: ReportData, settings: Settings) -> dict[str, object]
 
         Rules:
         - Separate facts from interpretation.
-        - Every major claim must cite source URLs using evidence ids.
+        - Every major claim must cite source URLs, not evidence ids.
+        - Never output evidence ids, Python dictionaries, or JSON fragments inside bullet text.
         - Prefer official evidence over secondary evidence.
         - Secondary evidence may confirm, not replace, official evidence.
         - If evidence is weak or missing, say so plainly.
@@ -74,6 +77,26 @@ def build_with_openai(data: ReportData, settings: Settings) -> dict[str, object]
     content = response.choices[0].message.content or "{}"
     sections = json.loads(content)
     return {key: sections.get(key, default_for_key(key)) for key in REPORT_TEMPLATE_KEYS}
+
+
+def preserve_verified_fact_sections(ai_sections: dict[str, object], deterministic: dict[str, object]) -> dict[str, object]:
+    """Keep calculated source-backed facts from being rewritten by the model."""
+    protected_prefixes = ("nvidia_", "ark_")
+    protected_keys = {
+        "gpu_facts",
+        "ai_cloud_facts",
+        "data_center_facts",
+        "storage_facts",
+        "energy_facts",
+        "watchlist",
+        "risk_warning",
+        "next_week_watch",
+    }
+    merged = {key: ai_sections.get(key, deterministic.get(key, default_for_key(key))) for key in REPORT_TEMPLATE_KEYS}
+    for key in REPORT_TEMPLATE_KEYS:
+        if key.startswith(protected_prefixes) or key in protected_keys:
+            merged[key] = deterministic[key]
+    return merged
 
 
 def build_fallback_sections(data: ReportData) -> dict[str, object]:
@@ -138,6 +161,8 @@ def cite_list(items: list[Evidence]) -> list[str]:
         and item.url
         and "no matching source-tier results" not in item.title.lower()
         and "search warning" not in item.title.lower()
+        and "collection warning" not in item.title.lower()
+        and "holdings warning" not in item.title.lower()
     ]
 
 
