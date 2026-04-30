@@ -44,14 +44,16 @@ def main() -> None:
 def validate_evidence(evidence: list) -> None:
     titles = [item.title.lower() for item in evidence]
     missing = []
-    if not any("nvidia 13f new positions" in title or "nvidia 13f exited positions" in title for title in titles):
-        missing.append("NVIDIA 13F comparison")
     if not any("ark secondary top buys" in title for title in titles):
         missing.append("ARK top buys")
     if not any("ark secondary top sells" in title for title in titles):
         missing.append("ARK top sells")
     if not any("ark official" in title and "top holdings" in title for title in titles):
         missing.append("ARK official holdings")
+    has_nvidia_comparison = any("nvidia 13f new positions" in title or "nvidia 13f exited positions" in title for title in titles)
+    has_nvidia_warning = any("nvidia 13f collection warning" in title for title in titles)
+    if not has_nvidia_comparison and not has_nvidia_warning:
+        missing.append("NVIDIA 13F source status")
     if missing:
         collected_titles = "; ".join(item.title for item in evidence[:20]) or "none"
         raise RuntimeError(

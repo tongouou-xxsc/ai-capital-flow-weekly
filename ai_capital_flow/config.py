@@ -9,8 +9,6 @@ from dotenv import load_dotenv
 
 @dataclass(frozen=True)
 class Settings:
-    openai_api_key: str | None
-    openai_model: str
     sec_user_agent: str
     timezone: str
     lookback_days: int
@@ -28,8 +26,6 @@ def load_settings() -> Settings:
         if fund.strip()
     )
     return Settings(
-        openai_api_key=os.getenv("OPENAI_API_KEY") or None,
-        openai_model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
         sec_user_agent=os.getenv("SEC_USER_AGENT") or "AI Capital Flow Weekly contact@example.com",
         timezone=os.getenv("REPORT_TIMEZONE", "America/New_York"),
         lookback_days=int(os.getenv("REPORT_LOOKBACK_DAYS", "7")),
