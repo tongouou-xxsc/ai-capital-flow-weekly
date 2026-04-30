@@ -50,7 +50,8 @@ def required_env(name: str) -> str:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Email weekly AI capital flow report.")
     parser.add_argument("--report", required=True, help="Path to reports/YYYY-MM-DD.md")
-    parser.add_argument("--social-post", help="Path to social_posts/YYYY-MM-DD-xiaohongshu.md")
+    parser.add_argument("--social-post", help="Path to social_posts/YYYY-MM-DD-xiaohongshu.md or .txt")
+    parser.add_argument("--extra-attachment", action="append", default=[], help="Extra attachment path.")
     return parser.parse_args()
 
 
@@ -61,11 +62,12 @@ def main() -> None:
     attachments = [report]
     if social_post:
         attachments.append(social_post)
+    attachments.extend(Path(path) for path in args.extra_attachment)
 
     body = (
         "Your weekly AI Capital Flow report is attached.\n\n"
         f"Report: {report.name}\n"
-        f"Xiaohongshu draft: {social_post.name if social_post else 'not generated'}\n\n"
+        "Xiaohongshu draft is saved in the GitHub repository under social_posts/.\n\n"
         "Risk reminder: this is research automation, not financial advice."
     )
     send_email(

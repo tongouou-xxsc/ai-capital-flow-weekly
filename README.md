@@ -6,8 +6,12 @@ Weekly Markdown report agent for tracking AI capital flows across:
 - Cathie Wood / ARK Invest daily trades and ETF holdings
 - AI infrastructure market signals across GPU, AI cloud, data centers, storage, and energy
 
-The output is saved to `reports/YYYY-MM-DD.md`.
-Xiaohongshu-ready drafts are saved to `social_posts/YYYY-MM-DD-xiaohongshu.md`.
+The report is saved in two formats:
+
+- `reports/YYYY-MM-DD.md`
+- `reports/YYYY-MM-DD.html`
+
+Xiaohongshu-ready drafts are saved as `social_posts/YYYY-MM-DD-xiaohongshu.md`.
 
 ## Setup
 
