@@ -1,29 +1,31 @@
 AI资金流周报｜2026-04-30
 
 一句话结论：
-Investment sentiment remains cautious due to lack of new data on NVIDIA and ARK's trading activities.
+Investment sentiment remains cautious due to lack of new data on NVIDIA and ARK's recent trades.
 
 1. NVIDIA
-- No evidence collected.
-- {'fact': "NVIDIA's SEC filings page is available but lacks recent updates.", 'evidence_id': 1}
-- {'fact': 'No new positions or exits reported in the last week.', 'evidence_id': 2}
+- No new investments reported; SEC filings unavailable (Evidence ID: 1).
+- No exits or reductions reported; SEC filings unavailable (Evidence ID: 1).
+- NVIDIA's quarterly results are a primary source for GPU revenue (Evidence ID: 15).
 
 2. ARK / Cathie Wood
-- No evidence collected.
-- {'fact': "ARK's trade notifications page is operational but lacks recent updates.", 'evidence_id': 6}
-- {'fact': 'No recent trades reported for ARK funds.', 'evidence_id': 14}
-- The lack of trading activity may indicate a strategic hold or market caution among ARK's management.
+- No top buys reported; ARK trade notifications unavailable (Evidence ID: 6).
+- No top sells reported; ARK trade notifications unavailable (Evidence ID: 6).
+- No repeated trends identified; ARK fund pages inaccessible (Evidence ID: 7).
+- ARK Invest provides daily trade notifications for actively managed ETFs (Evidence ID: 6).
 
 3. AI基础设施信号
-- {'fact': "NVIDIA's quarterly results are the primary source for GPU revenue insights.", 'evidence_id': 15}
-- {'fact': 'No recent updates on GPU demand from NVIDIA or AMD.', 'evidence_id': 17}
-- {'fact': 'Microsoft, Amazon, and Alphabet provide official insights into AI cloud demand.', 'evidence_id': 19}
-- {'fact': 'No recent updates on AI cloud capex from these companies.', 'evidence_id': 22}
-- {'fact': 'Equinix and Digital Realty are key sources for data center demand.', 'evidence_id': 24}
+- No recent official data on GPU demand or supply from NVIDIA or AMD (Evidence ID: 17).
+- Microsoft, Amazon, and Alphabet provide official commentary on AI cloud demand (Evidence IDs: 19, 20, 21).
+- Equinix and Digital Realty are official sources for data-center demand (Evidence IDs: 24, 25).
+- Seagate and Western Digital provide insights on storage demand related to AI (Evidence IDs: 28, 29).
+- U.S. EIA and DOE are official sources for electricity market data relevant to data centers (Evidence IDs: 32, 33).
 
 4. 投资含义
-- No evidence collected.
-- Lack of recent data may indicate market stagnation or caution among investors.
+- No bullish signals identified due to lack of new data.
+- Lack of transparency in NVIDIA and ARK's investment activities may signal caution.
+- Monitor NVIDIA and ARK for any upcoming filings or trade notifications.
+- Investment risks are elevated due to lack of recent data and transparency.
 
 我的观察：
 AI交易正在从“谁有AI概念”转向“谁控制算力、云、数据中心、电力和真实资本流”。后续重点看：NVDA 13F变化、ARK连续买卖方向、云厂商AI capex、数据中心电力约束。
