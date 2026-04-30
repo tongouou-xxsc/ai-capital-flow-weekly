@@ -41,4 +41,3 @@ jobs:
           git add reports/*.md social_posts/*.md
           git diff --cached --quiet || git commit -m "Add weekly AI capital flow report"
           git push
-

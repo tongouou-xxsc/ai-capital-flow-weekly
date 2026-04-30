@@ -118,4 +118,3 @@ Good next additions:
 - Email delivery: add a `delivery/email.py` module that sends the Markdown file.
 - PDF export: add `export/pdf.py` using Playwright or WeasyPrint.
 - Dashboard: read report files from `reports/` and expose them through a small web app.
-# ai-capital-flow-weekly
