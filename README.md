@@ -112,6 +112,7 @@ For Gmail, use:
 - `EMAIL_TO`: the recipient email address
 
 If `ENABLE_EMAIL` is not set to `true`, the weekly report still runs normally but skips the email step.
+The email attaches only the HTML report, while Markdown reports and Xiaohongshu drafts remain saved in GitHub.
 
 ## Publishing to Xiaohongshu
 
