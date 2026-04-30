@@ -53,11 +53,14 @@ def validate_evidence(evidence: list) -> None:
     if not any("ark official" in title and "top holdings" in title for title in titles):
         missing.append("ARK official holdings")
     if missing:
+        collected_titles = "; ".join(item.title for item in evidence[:20]) or "none"
         raise RuntimeError(
             "Sparse report blocked. Missing: "
             + ", ".join(missing)
             + ". Check GitHub Secrets, especially SEC_USER_AGENT, and rerun. "
-            + "Use --allow-sparse only if you intentionally want a source-page-only report."
+            + "Use --allow-sparse only if you intentionally want a source-page-only report. "
+            + "Collected evidence titles: "
+            + collected_titles
         )
 
 

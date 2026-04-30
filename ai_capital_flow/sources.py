@@ -147,10 +147,28 @@ class SourceClient:
         self.session = requests.Session()
         self.session.headers.update(
             {
-                "User-Agent": settings.sec_user_agent,
+                "User-Agent": (
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/124.0 Safari/537.36"
+                ),
                 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.9",
             }
         )
+
+    def sec_headers(self) -> dict[str, str]:
+        return {
+            "User-Agent": self.settings.sec_user_agent,
+            "Accept-Encoding": "gzip, deflate",
+            "Host": "data.sec.gov",
+        }
+
+    def sec_archive_headers(self) -> dict[str, str]:
+        return {
+            "User-Agent": self.settings.sec_user_agent,
+            "Accept-Encoding": "gzip, deflate",
+        }
 
     def collect(self, report_date: date) -> list[Evidence]:
         evidence: list[Evidence] = []
@@ -173,7 +191,9 @@ class SourceClient:
         ]
         try:
             submissions_url = f"https://data.sec.gov/submissions/CIK{NVIDIA_CIK}.json"
-            data = self.session.get(submissions_url, timeout=30).json()
+            response = self.session.get(submissions_url, headers=self.sec_headers(), timeout=30)
+            response.raise_for_status()
+            data = response.json()
             recent = data.get("filings", {}).get("recent", {})
             rows = zip(
                 recent.get("accessionNumber", []),
@@ -221,7 +241,9 @@ class SourceClient:
     def fetch_13f_holdings(self, accession: str) -> dict[str, int]:
         accession_no_dash = accession.replace("-", "")
         base_url = f"https://www.sec.gov/Archives/edgar/data/{int(NVIDIA_CIK)}/{accession_no_dash}/"
-        index = self.session.get(urljoin(base_url, "index.json"), timeout=30).json()
+        index_response = self.session.get(urljoin(base_url, "index.json"), headers=self.sec_archive_headers(), timeout=30)
+        index_response.raise_for_status()
+        index = index_response.json()
         files = index.get("directory", {}).get("item", [])
         info_file = next(
             (
@@ -235,7 +257,9 @@ class SourceClient:
         )
         if not info_file:
             return {}
-        xml_text = self.session.get(urljoin(base_url, info_file), timeout=30).text
+        xml_response = self.session.get(urljoin(base_url, info_file), headers=self.sec_archive_headers(), timeout=30)
+        xml_response.raise_for_status()
+        xml_text = xml_response.text
         root = ET.fromstring(xml_text.encode("utf-8"))
         holdings: dict[str, int] = {}
         for info in root.iter():
