@@ -1,0 +1,44 @@
+name: Weekly AI Capital Flow Report
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 13 * * 1"
+
+permissions:
+  contents: write
+
+jobs:
+  build-report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate report
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: gpt-4o-mini
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+          REPORT_TIMEZONE: America/New_York
+        run: python scripts/run_report.py
+
+      - name: Create Xiaohongshu draft
+        run: |
+          latest_report="$(ls -1 reports/*.md | sort | tail -n 1)"
+          python scripts/create_xiaohongshu_post.py "$latest_report"
+
+      - name: Commit report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/*.md social_posts/*.md
+          git diff --cached --quiet || git commit -m "Add weekly AI capital flow report"
+          git push
+
