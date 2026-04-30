@@ -33,6 +33,12 @@ Edit `.env` and set:
 python3 scripts/run_report.py
 ```
 
+By default, the run fails instead of publishing a thin report if key NVIDIA or ARK evidence is missing. For debugging only, you can allow a sparse report:
+
+```bash
+python3 scripts/run_report.py --allow-sparse
+```
+
 Create a Xiaohongshu draft from a generated report:
 
 ```bash
