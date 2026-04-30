@@ -34,6 +34,20 @@ jobs:
           latest_report="$(ls -1 reports/*.md | sort | tail -n 1)"
           python scripts/create_xiaohongshu_post.py "$latest_report"
 
+      - name: Email report
+        if: ${{ secrets.SMTP_HOST != '' && secrets.SMTP_USER != '' && secrets.SMTP_PASSWORD != '' && secrets.EMAIL_TO != '' }}
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        run: |
+          latest_report="$(ls -1 reports/*.md | sort | tail -n 1)"
+          latest_post="$(ls -1 social_posts/*.md | sort | tail -n 1)"
+          python scripts/send_email.py --report "$latest_report" --social-post "$latest_post"
+
       - name: Commit report
         run: |
           git config user.name "github-actions[bot]"

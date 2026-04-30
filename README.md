@@ -91,6 +91,32 @@ To use it:
 The workflow runs weekly and commits the generated report back to the repository.
 It also creates a Xiaohongshu draft in `social_posts/`.
 
+## Email Delivery
+
+Email delivery is optional. Add these GitHub Actions secrets if you want the weekly report emailed after each run:
+
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_USER`
+- `SMTP_PASSWORD`
+- `EMAIL_FROM`
+- `EMAIL_TO`
+
+For Gmail, use:
+
+- `SMTP_HOST`: `smtp.gmail.com`
+- `SMTP_PORT`: `587`
+- `SMTP_USER`: your Gmail address
+- `SMTP_PASSWORD`: a Gmail app password, not your normal login password
+- `EMAIL_FROM`: your Gmail address
+- `EMAIL_TO`: the recipient email address
+
+You can also test email locally:
+
+```bash
+python3 scripts/send_email.py --report reports/2026-04-30.md --social-post social_posts/2026-04-30-xiaohongshu.md
+```
+
 ## Publishing to Xiaohongshu
 
 The safe workflow is semi-automatic:
