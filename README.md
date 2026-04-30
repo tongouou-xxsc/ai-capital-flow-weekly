@@ -93,14 +93,10 @@ It also creates a Xiaohongshu draft in `social_posts/`.
 
 ## Email Delivery
 
-Email delivery is optional. Add these GitHub Actions secrets if you want the weekly report emailed after each run:
+Email delivery is optional and controlled by a GitHub Actions variable:
 
-- `SMTP_HOST`
-- `SMTP_PORT`
-- `SMTP_USER`
-- `SMTP_PASSWORD`
-- `EMAIL_FROM`
-- `EMAIL_TO`
+- Add repository variable `ENABLE_EMAIL` with value `true`
+- Add repository secrets `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `EMAIL_FROM`, and `EMAIL_TO`
 
 For Gmail, use:
 
@@ -111,11 +107,7 @@ For Gmail, use:
 - `EMAIL_FROM`: your Gmail address
 - `EMAIL_TO`: the recipient email address
 
-You can also test email locally:
-
-```bash
-python3 scripts/send_email.py --report reports/2026-04-30.md --social-post social_posts/2026-04-30-xiaohongshu.md
-```
+If `ENABLE_EMAIL` is not set to `true`, the weekly report still runs normally but skips the email step.
 
 ## Publishing to Xiaohongshu
 

@@ -35,7 +35,7 @@ jobs:
           python scripts/create_xiaohongshu_post.py "$latest_report"
 
       - name: Email report
-        if: ${{ secrets.SMTP_HOST != '' && secrets.SMTP_USER != '' && secrets.SMTP_PASSWORD != '' && secrets.EMAIL_TO != '' }}
+        if: ${{ vars.ENABLE_EMAIL == 'true' }}
         env:
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
