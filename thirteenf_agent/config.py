@@ -15,7 +15,8 @@ class Settings:
 
 def load_settings() -> Settings:
     load_dotenv()
+    sec_user_agent = (os.getenv("SEC_USER_AGENT") or "13F Analysis Agent contact@example.com").strip()
     return Settings(
-        sec_user_agent=os.getenv("SEC_USER_AGENT") or "13F Analysis Agent contact@example.com",
+        sec_user_agent=sec_user_agent,
         output_dir=Path(os.getenv("REPORT_OUTPUT_DIR", "reports")),
     )
