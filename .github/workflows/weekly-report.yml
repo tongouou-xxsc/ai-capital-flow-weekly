@@ -1,15 +1,24 @@
-name: Weekly AI Capital Flow Report
+name: Quarterly 13F Analysis Report
 
 on:
   workflow_dispatch:
+    inputs:
+      fund:
+        description: "Fund or manager name"
+        required: true
+        default: "Situational Awareness LP"
+      cik:
+        description: "Optional SEC CIK"
+        required: false
+        default: ""
   schedule:
-    - cron: "0 13 * * 1"
+    - cron: "0 13 16 2,5,8,11 *"
 
 permissions:
   contents: write
 
 jobs:
-  build-report:
+  build-13f-report:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,17 +30,23 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Generate report
+      - name: Generate 13F report
         env:
           SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
-          REPORT_TIMEZONE: America/New_York
-        run: python scripts/run_report.py
+        run: |
+          fund="${{ github.event.inputs.fund || 'Situational Awareness LP' }}"
+          cik="${{ github.event.inputs.cik }}"
+          if [ -n "$cik" ]; then
+            python scripts/run_13f_report.py --fund "$fund" --cik "$cik"
+          else
+            python scripts/run_13f_report.py --fund "$fund"
+          fi
 
       - name: Commit report
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add reports/*.md reports/*.html
-          git diff --cached --quiet || git commit -m "Add weekly AI capital flow report"
+          git add reports/*.md
+          git diff --cached --quiet || git commit -m "Add quarterly 13F analysis report"
           git pull --rebase origin main
           git push

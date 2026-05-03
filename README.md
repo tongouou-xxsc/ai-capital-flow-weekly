@@ -1,19 +1,22 @@
-# AI Capital Flow Weekly
+# 13F Analysis Agent
 
-Weekly AI investment report generator.
+Python agent that fetches a fund's latest two 13F filings, detects portfolio changes, classifies holdings by AI infrastructure sector, and writes an investment report.
 
-It tracks:
+## What It Does
 
-- NVIDIA 13F / SEC filing changes and NVentures signals
-- Cathie Wood / ARK Invest trades and ETF holdings
-- AI infrastructure signals across GPU, AI cloud, data centers, storage, and energy
-
-Reports are saved in:
-
-- `reports/YYYY-MM-DD.md`
-- `reports/YYYY-MM-DD.html`
-
-Use the `.html` file if you want the easiest reading format.
+- Fetch latest 13F filings from SEC EDGAR
+- Accept fund or manager name, such as `Situational Awareness LP`
+- Optional `--cik` input when SEC name matching is imperfect
+- Compare current vs previous quarter
+- Detect new, increased, reduced, and closed positions
+- Classify holdings into:
+  - AI Chips
+  - AI Cloud
+  - Data Center
+  - Power / Energy
+  - Networking
+  - Other
+- Generate Markdown report at `reports/YYYY-MM-DD.md`
 
 ## Setup
 
@@ -24,41 +27,60 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Edit `.env` and set:
+Edit `.env`:
 
 ```text
-SEC_USER_AGENT=AI Capital Flow Weekly your_email@example.com
+SEC_USER_AGENT=13F Analysis Agent your_email@example.com
 ```
 
-This is required by the SEC for automated access. It is not a password.
+SEC requires automated requests to include a real contact. This is not a password.
 
-## Run Locally
+## Run
+
+Analyze by fund name:
 
 ```bash
-python3 scripts/run_report.py
+python3 scripts/run_13f_report.py --fund "Situational Awareness LP"
 ```
 
-Choose a report date:
+If name matching fails, use a SEC CIK:
 
 ```bash
-python3 scripts/run_report.py --date 2026-04-30
+python3 scripts/run_13f_report.py --fund "Situational Awareness LP" --cik 0000000000
 ```
 
-For debugging only, allow a sparse report even if key sources fail:
+Use a specific output date:
 
 ```bash
-python3 scripts/run_report.py --allow-sparse
+python3 scripts/run_13f_report.py --fund "Situational Awareness LP" --date 2026-05-03
+```
+
+## Report Format
+
+```text
+# 13F Analysis Report
+
+## One-line Conclusion
+Funds moved from ___ to ___.
+
+## Key Changes
+### Added
+### Increased
+### Reduced
+### Closed
+
+## Sector Shift
+
+## Core Thesis
+
+## Investment Implications
+
+## Next Validation Points
 ```
 
 ## GitHub Actions
 
-The workflow is at:
-
-```text
-.github/workflows/weekly-report.yml
-```
-
-It runs every Monday and commits the generated report back to GitHub.
+The workflow at `.github/workflows/weekly-report.yml` can run manually or quarterly.
 
 Required GitHub Secret:
 
@@ -66,33 +88,29 @@ Required GitHub Secret:
 SEC_USER_AGENT
 ```
 
-Example value:
-
-```text
-AI Capital Flow Weekly your_email@example.com
-```
-
 Manual run:
 
 ```text
-Actions → .github/workflows/weekly-report.yml → Run workflow
+Actions → Quarterly 13F Analysis Report → Run workflow
 ```
 
-## Source Policy
+Enter:
 
-Official sources first:
+- `fund`: fund or manager name
+- `cik`: optional SEC CIK
 
-- NVIDIA Investor Relations / SEC filings
-- NVentures
-- ARK Invest fund holdings
+## Extensibility
 
-Secondary sources only for confirmation:
+The code is modular:
 
-- Cathie's Ark
-- Fintel
-- 13F.info
-- Reuters / Barron's / Yahoo Finance
+- `thirteenf_agent/sec_client.py`: SEC fetching and XML parsing
+- `thirteenf_agent/analysis.py`: change detection and sector flow
+- `thirteenf_agent/classifier.py`: sector classification rules
+- `thirteenf_agent/report.py`: Markdown report output
+- `thirteenf_agent/cli.py`: command-line interface
 
-## Notes
+Future additions can include email sending, PDF export, and integration with a broader weekly report.
+
+## Disclaimer
 
 This is research automation, not financial advice. Always verify filings, timestamps, liquidity, and valuation before investing.
