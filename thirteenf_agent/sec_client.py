@@ -26,13 +26,22 @@ class SecClient:
         )
 
     def resolve_cik(self, fund_name: str) -> tuple[str, str]:
-        browse_match = self.resolve_cik_from_browse_edgar(fund_name)
-        if browse_match:
-            return browse_match
+        candidates = self.cik_candidates_from_browse_edgar(fund_name)
+        candidates.extend(self.cik_candidates_from_company_tickers(fund_name))
+        candidates = sorted(dedupe_candidates(candidates), reverse=True)
+        for score, cik, matched_name in candidates[:10]:
+            if score < 0.45:
+                continue
+            if self.has_recent_13f_pair(cik):
+                return cik, matched_name
+        raise RuntimeError(
+            f"Could not resolve '{fund_name}' to a CIK with at least two recent 13F-HR filings. "
+            "Use --cik with the manager CIK from SEC EDGAR."
+        )
 
-        url = "https://www.sec.gov/files/company_tickers.json"
-        data = self._get_json(url)
-        candidates = []
+    def cik_candidates_from_company_tickers(self, fund_name: str) -> list[tuple[float, str, str]]:
+        data = self._get_json("https://www.sec.gov/files/company_tickers.json")
+        candidates: list[tuple[float, str, str]] = []
         query = normalize_name(fund_name)
         for item in data.values():
             title = item.get("title", "")
@@ -40,16 +49,9 @@ class SecClient:
             if query in normalize_name(title):
                 score += 0.3
             candidates.append((score, str(item["cik_str"]).zfill(10), title))
-        candidates.sort(reverse=True)
-        best_score, cik, matched_name = candidates[0]
-        if best_score < 0.55:
-            raise RuntimeError(
-                f"Could not confidently resolve fund name '{fund_name}' to a SEC CIK. "
-                "Use --cik with the manager CIK from SEC EDGAR."
-            )
-        return cik, matched_name
+        return candidates
 
-    def resolve_cik_from_browse_edgar(self, fund_name: str) -> tuple[str, str] | None:
+    def cik_candidates_from_browse_edgar(self, fund_name: str) -> list[tuple[float, str, str]]:
         url = (
             "https://www.sec.gov/cgi-bin/browse-edgar"
             f"?company={quote_plus(fund_name)}&owner=exclude&action=getcompany&count=10&output=atom"
@@ -58,7 +60,7 @@ class SecClient:
             xml_text = self._get_text(url)
             root = ET.fromstring(xml_text.encode("utf-8"))
         except Exception:
-            return None
+            return []
         query = normalize_name(fund_name)
         candidates: list[tuple[float, str, str]] = []
         for entry in root.iter():
@@ -78,11 +80,14 @@ class SecClient:
             if query in normalize_name(title):
                 score += 0.3
             candidates.append((score, cik, title))
-        if not candidates:
-            return None
-        candidates.sort(reverse=True)
-        score, cik, title = candidates[0]
-        return (cik, title) if score >= 0.45 else None
+        return candidates
+
+    def has_recent_13f_pair(self, cik: str) -> bool:
+        try:
+            self.fetch_recent_13f_filings(cik, limit=2)
+            return True
+        except Exception:
+            return False
 
     def fetch_recent_13f_filings(self, cik: str, limit: int = 2) -> list[Filing]:
         cik = cik.zfill(10)
@@ -225,3 +230,12 @@ def normalize_name(value: str) -> str:
     value = re.sub(r"[^A-Z0-9 ]+", " ", value)
     value = re.sub(r"\b(LP|LLC|LTD|INC|CORP|CO|THE|ADVISORS|MANAGEMENT)\b", " ", value)
     return clean_spaces(value)
+
+
+def dedupe_candidates(candidates: list[tuple[float, str, str]]) -> list[tuple[float, str, str]]:
+    best_by_cik: dict[str, tuple[float, str, str]] = {}
+    for score, cik, title in candidates:
+        existing = best_by_cik.get(cik)
+        if not existing or score > existing[0]:
+            best_by_cik[cik] = (score, cik, title)
+    return list(best_by_cik.values())

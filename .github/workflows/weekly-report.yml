@@ -10,7 +10,7 @@ on:
       cik:
         description: "Optional SEC CIK"
         required: false
-        default: ""
+        default: "0002045724"
   schedule:
     - cron: "0 13 16 2,5,8,11 *"
 
